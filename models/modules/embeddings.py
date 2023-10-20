@@ -5,8 +5,8 @@ import torch.nn as nn
 def timestep(timesteps: torch.Tensor, dim: int, max_period: int = 10000):
     half = dim // 2
 
-    mp = torch.tensor(max_period, device=timesteps.device)
-    ex = -torch.log(mp) * torch.arange(start=0, end=half, dtype=torch.float32, device=timesteps.device)
+    maxp = torch.tensor(max_period, device=timesteps.device)
+    ex = -torch.log(maxp) * torch.arange(start=0, end=half, dtype=torch.float32, device=timesteps.device)
     ex = ex / half  # diffuser 中使用的是 half - downscale_freq_shift [1]
 
     emb = torch.exp(ex)

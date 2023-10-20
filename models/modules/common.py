@@ -2,13 +2,6 @@ import torch.nn as nn
 import torch
 
 
-class Concat(nn.Module):
-    def __init__(self) -> None:
-        super(Concat, self).__init__()
-
-    def forward(self, x, y):
-        return torch.concat([x, y], dim=1)
-
 
 class AvgPool2x(nn.Module):
     def __init__(self):
@@ -20,18 +13,23 @@ class AvgPool2x(nn.Module):
 
 
 class Conv3x3(nn.Module):
-    def __init__(self, ch_in: int, ch_out: int, strides: int = 1):
+    def __init__(self, ch_in: int, ch_out: int, strides: int = 1, act = True):
         '''
         ch_input: 输入通道数
         ch_output: 输出通道数
         '''
         super(Conv3x3, self).__init__()
-        self.conv = nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=1, padding=1, bias=False)
+        self.act = act
+        self.conv = nn.Conv2d(ch_in, ch_out, kernel_size=3, stride=1, padding=1)
         self.bn = nn.BatchNorm2d(ch_out)
-        self.silu = nn.SiLU()
+        if act:
+            self.silu = nn.SiLU()
 
     def forward(self, x: torch.Tensor):
-        return self.silu(self.bn(self.conv(x)))
+        output = self.bn(self.conv(x))
+        if self.act:
+            output = self.silu(output)
+        return output
 
 
 class Conv1x1(nn.Module):
@@ -41,7 +39,7 @@ class Conv1x1(nn.Module):
         ch_output: 输出通道数
         '''
         super(Conv1x1, self).__init__()
-        self.conv = nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0, bias=False)
+        self.conv = nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, padding=0)
         self.bn = nn.BatchNorm2d(ch_out)
         self.silu = nn.SiLU()
 

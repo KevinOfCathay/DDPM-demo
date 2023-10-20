@@ -17,11 +17,12 @@ class DFUNet(Model):
             in_channels=config.input_channels,  # 输入通道数
             out_channels=config.input_channels,  # 输出通道数
             layers_per_block=config.layers,
-            block_out_channels=(32, 32, 64, 64, 128, 128),
+            block_out_channels=(64, 64, 128, 128, 256, 256),
             down_block_types=("DownBlock2D", "DownBlock2D", "DownBlock2D",
-                              "DownBlock2D", "AttnDownBlock2D", "DownBlock2D"),
-            up_block_types=("UpBlock2D",  "AttnUpBlock2D", "UpBlock2D",
+                              "DownBlock2D", "DownBlock2D", "DownBlock2D"),
+            up_block_types=("UpBlock2D",  "UpBlock2D", "UpBlock2D",
                             "UpBlock2D", "UpBlock2D", "UpBlock2D"),
+            add_attention=False
         )
 
     def forward(self, x, timesteps):

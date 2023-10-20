@@ -7,7 +7,7 @@ class Config:
         self.config = safe_load(open(config_path, 'r', encoding='utf-8'))
 
         self.proj_name = self.config["name"]
-        
+
         self.num_train_timesteps = self.config["train"]["steps"]
         self.beta_start: float = self.config["train"]["beta"][0]
         self.beta_end: float = self.config["train"]["beta"][1]
@@ -28,4 +28,5 @@ class Config:
 
         self.model_channels: int = int(self.config["model"]["base_channels"])
         self.ts_embed_dims: int = int(self.config["model"]["timestep_embed_dims"])
+        self.ts_proj_dims: int = int(self.config["model"]["timestep_proj_dims"])
         self.layers: int = int(self.config["model"]["layers"])

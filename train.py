@@ -1,5 +1,6 @@
 from torch.utils.data import DataLoader
 from models.diffuser_unet import DFUNet
+from models.unet import UNet
 from config.config import Config
 from data.mnist_data import MNISTData
 from scheduler.ddpm_scheduler import DDPMScheduler
@@ -12,11 +13,11 @@ import torch.nn as nn
 from tqdm.auto import tqdm
 
 config = Config(r"config.yaml")
-model = DFUNet(config).to(config.device)
+model = UNet(config).to(config.device)
 scheduler = DDPMScheduler(config)
 
-# diffusers 里面用的是 AdamW
-# lr 对于训练的影响程度不大
+# diffusers 里面用的是 AdamW,  
+# lr 对于训练的影响程度不大?
 optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 
 training_data = MNISTData(config, r"dataset")
@@ -40,7 +41,7 @@ for ep in range(config.epochs):
         noise = torch.randn(image.shape).to(config.device)
         noisy_image = scheduler.add_noise(image=image, noise=noise, timesteps=timesteps)
 
-        pred = model(noisy_image, timesteps)[0]
+        pred = model(noisy_image, timesteps)
         loss = torch.nn.functional.mse_loss(pred, noise)
         optimizer.zero_grad()
         loss.backward()

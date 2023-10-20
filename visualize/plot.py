@@ -62,6 +62,6 @@ def plot_images(
 def plot_arrays(x: 'torch.Tensor', ys: 'torch.Tensor'):
     _, axes = pyplot.subplots(1, 1)
     for y in ys:
-        axes.plot(x.cpu().numpy(), y.cpu().numpy(), markersize=2)
+        axes.plot(x.cpu().numpy(), y.cpu().numpy(), markersize=3)
 
     pyplot.show()
