@@ -19,6 +19,43 @@ def timestep(timesteps: torch.Tensor, dim: int, max_period: int = 10000):
     return emb
 
 
+class TimestepBlock(nn.Module):
+    def __init__(self, in_channels: int, out_channels: int, ts_dims: int):
+        '''
+        channels: 输入/输出通道数
+        '''
+        super(TimestepBlock, self).__init__()
+
+        self.ts_linear = nn.Linear(ts_dims, out_channels)
+
+        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, 1, 1)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.act1 = nn.SiLU()
+
+        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, 1, 1)
+        self.bn2 = nn.BatchNorm2d(out_channels)
+        self.act2 = nn.SiLU()
+
+    def forward(self, x: torch.Tensor, ts: torch.Tensor):
+        '''
+        x: 输入图片
+        t: timestep
+        '''
+        x_conv_1 = self.conv1(x)
+        t_linear_1 = self.ts_linear(ts)[:, :, None, None]
+
+        x_add_t = torch.add(x_conv_1, t_linear_1)
+
+        x_bn_1 = self.bn1(x_add_t)
+        x_silu_1 = self.act1(x_bn_1)
+
+        x_conv_2 = self.conv2(x_silu_1)
+        x_bn_2 = self.bn2(x_conv_2)
+        x_silu_2 = self.act2(x_bn_2)
+
+        return x_silu_2
+
+
 # 仅测试用
 if __name__ == "__main__":
     import sys

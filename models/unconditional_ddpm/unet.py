@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from models.modules.common import Conv3x3
-from models.modules.residual import ResAttentionModule
+from models.modules.res import ResAttentionModule
 from models.modules.embeddings import timestep
 from typing import TYPE_CHECKING
 from models.model import Model
@@ -33,17 +33,16 @@ class UNet(Model):
         self.res_atten_L3 = ResAttentionModule(ch*2, ch*2, ts_proj_dims, attention=False, layers=layers, downscale=True)  # 128 x 16 x 16 -> 128 x 8 x 8
         self.res_atten_L4 = ResAttentionModule(ch*2, ch*4, ts_proj_dims, attention=False, layers=layers)                           # 128 x 8 x 8 -> 256 x 8 x 8
         self.res_atten_L5 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, attention=False, layers=layers, downscale=True)  # 256 x 8 x 8 -> 256 x 4 x 4
-        self.res_atten_L6 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, attention=False, layers=layers)                           # 256 x 4 x 4 -> 256 x 4 x 4
+        self.res_atten_L6 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, attention=False, layers=layers)                           # 256 x 4 x 4 -> [256 x 4 x 4]
 
-        self.res_atten_M1 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, layers=layers)                           # 256 x 4 x 4 -> 256 x 4 x 4
+        self.res_atten_M1 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, layers=layers)                                                 # 256 x 4 x 4 -> 256 x 4 x 4
 
-        self.res_atten_R1 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, attention=False, layers=layers)                           # 256 x 4 x 4 -> 256 x 4 x 4
+        self.res_atten_R1 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, attention=False, layers=layers)                           # 256 x 4 x 4 -> [256 x 4 x 4]
         self.res_atten_R2 = ResAttentionModule(ch*8, ch*4, ts_proj_dims, attention=False, layers=layers, upsacle=True)    # 512 x 4 x 4 -> 256 x 8 x 8
         self.res_atten_R3 = ResAttentionModule(ch*4, ch*4, ts_proj_dims, attention=False, layers=layers)                            # 256 x 8 x 8 -> 256 x 8 x 8
         self.res_atten_R4 = ResAttentionModule(ch*8, ch*2, ts_proj_dims, attention=False, layers=layers, upsacle=True)   # 512 x 8 x 8 -> 128 x 16 x 16
         self.res_atten_R5 = ResAttentionModule(ch*2, ch*2, ts_proj_dims, attention=False, layers=layers)                           # 128 x 16 x 16 -> 128 x 16 x 16
         self.res_atten_R6 = ResAttentionModule(ch*4, ch, ts_proj_dims, attention=False, layers=layers, upsacle=True)       # 256 x 16 x 16 -> 64 x 32 x 32
-        self.res_atten_R7 = ResAttentionModule(ch*2, ch, ts_proj_dims, attention=False, layers=layers)                               # 128 x 32 x 32 -> 64 x 32 x 32
 
         self.last_conv = Conv3x3(ch, self.ch_input, 1)       # 64 -> 3
 
@@ -72,7 +71,7 @@ class UNet(Model):
         res_r1 = self.res_atten_R1(res_m1, ts)
 
         # concat
-        concat_r1_l4 = torch.concat([res_r1, res_l5], dim=1)
+        concat_r1_l4 = torch.concat([res_r1, res_l6], dim=1)
         res_r2 = self.res_atten_R2(concat_r1_l4, ts)
         res_r3 = self.res_atten_R3(res_r2, ts)
 
@@ -86,10 +85,6 @@ class UNet(Model):
         res_r6 = self.res_atten_R6(concat_9_3, ts)
 
         # concat
-        concat_10_2 = torch.concat([res_r6, conv_1], dim=1)
-        res_r7 = self.res_atten_R7(concat_10_2, ts)
-
-        # concat
-        final = self.last_conv(res_r7)
+        final = self.last_conv(res_r6)
 
         return final

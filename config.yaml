@@ -2,11 +2,11 @@ name: test
 
 train:
   steps: 1000
-  image_size: 32
-  image_channels: 1
-  lr: 0.001
+  image_size: 64
+  image_channels: 3
+  lr: 0.0001
   beta: [0.0001, 0.02]    # start, end
-  batch: 128
+  batch: 64
   epochs: 100
   save_period: 20
   sample_period: 1
@@ -19,7 +19,7 @@ model:
   base_channels: 64
   timestep_embed_dims: 64
   timestep_proj_dims: 256
-  layers: 1
+  layers: 2
 
 device: "cuda:1"
 clip: 1.0

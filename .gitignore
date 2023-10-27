@@ -1,4 +1,5 @@
 checkpoints/
 dataset/
 test/
+.vscode/
 **/__pycache__

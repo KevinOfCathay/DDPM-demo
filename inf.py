@@ -1,4 +1,4 @@
-from models.unet import UNet
+from models.unconditional_ddpm.unet import UNet
 from config.config import Config
 from visualize.plot import *
 from typing import Optional
@@ -16,7 +16,7 @@ def inference(model, scheduler, images: int, config: 'Config', noise: Optional[t
 
     for t in scheduler.inf_timesteps:
         with torch.no_grad():   # 不加入这一行显存会溢出
-            noisy_pred = model(noisy_sample, t[None].to(config.device))
+            noisy_pred = model(noisy_sample, t[None].to(config.device)).sample
             noisy_sample = scheduler.step(noisy_pred, t, noisy_sample)  # type: ignore
 
     return noisy_sample

@@ -33,6 +33,6 @@ class MNISTData(Dataset):
     def __getitem__(self, idx: int):
         image, label = self.dataset.__getitem__(index=idx)
         if self.return_label:
-            return image.to(self.config.device), label
+            return image.to(self.config.device), torch.tensor(label).to(self.config.device)
         else:
             return image.to(self.config.device)

@@ -1,5 +1,5 @@
 
-from yaml import SafeLoader, safe_load
+from yaml import safe_load
 
 
 class Config:

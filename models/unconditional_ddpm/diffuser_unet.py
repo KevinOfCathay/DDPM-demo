@@ -21,9 +21,8 @@ class DFUNet(Model):
             down_block_types=("DownBlock2D", "DownBlock2D", "DownBlock2D",
                               "DownBlock2D", "DownBlock2D", "DownBlock2D"),
             up_block_types=("UpBlock2D",  "UpBlock2D", "UpBlock2D",
-                            "UpBlock2D", "UpBlock2D", "UpBlock2D"),
-            add_attention=False
+                            "UpBlock2D", "UpBlock2D", "UpBlock2D")
         )
 
-    def forward(self, x, timesteps):
-        return self.model(x, timesteps)
+    def forward(self, x, ts):
+        return self.model(x, ts)[0]

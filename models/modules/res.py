@@ -1,44 +1,30 @@
 import torch.nn as nn
 import torch
-from models.modules.common import Conv3x3, Conv1x1, AvgPool2x, Upsample2x
+from models.modules.common import Conv3x3, Conv1x1
+from models.modules.embeddings import TimestepBlock
 from models.modules.attention import Attention
+from typing import Optional
 
 
-class TimestepBlock(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, ts_dims: int):
-        '''
-        channels: 输入/输出通道数
-        '''
-        super(TimestepBlock, self).__init__()
+class ResnetBlock(nn.Module):
+    '''
+    一个不带 timestep embedding 的 resnet block
+    '''
 
-        self.ts_linear = nn.Linear(ts_dims, out_channels)
+    def __init__(self, in_channels: int, out_channels: int) -> None:
+        super(ResnetBlock, self).__init__()
+        self.conv = Conv3x3(in_channels, out_channels)
+        self.skip = in_channels == out_channels
 
-        self.conv1 = nn.Conv2d(in_channels, out_channels, 3, 1, 1)
-        self.bn1 = nn.BatchNorm2d(out_channels)
-        self.act1 = nn.SiLU()
+        if self.skip:
+            self.conv_skip = Conv1x1(in_channels, out_channels)
 
-        self.conv2 = nn.Conv2d(out_channels, out_channels, 3, 1, 1)
-        self.bn2 = nn.BatchNorm2d(out_channels)
-        self.act2 = nn.SiLU()
-
-    def forward(self, x: torch.Tensor, ts: torch.Tensor):
-        '''
-        x: 输入图片
-        t: timestep
-        '''
-        x_conv_1 = self.conv1(x)
-        t_linear_1 = self.ts_linear(ts)[:, :, None, None]
-
-        x_add_t = torch.add(x_conv_1, t_linear_1)
-
-        x_bn_1 = self.bn1(x_add_t)
-        x_silu_1 = self.act1(x_bn_1)
-
-        x_conv_2 = self.conv2(x_silu_1)
-        x_bn_2 = self.bn2(x_conv_2)
-        x_silu_2 = self.act2(x_bn_2)
-
-        return x_silu_2
+    def forward(self, x):
+        input_x = x
+        conv1 = self.conv(x)
+        if self.skip:
+            input_x = self.conv_skip(input_x)
+        return conv1 + input_x
 
 
 class ResAttentionModule(nn.Module):
