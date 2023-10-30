@@ -1,5 +1,4 @@
 from diffusers import UNet2DModel
-import torch
 from models.model import Model
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

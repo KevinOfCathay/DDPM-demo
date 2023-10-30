@@ -1,10 +1,10 @@
-from pathlib import Path
-import sys
-top_dir = Path(__file__).resolve().parent.parent.parent
-sys.path.append(str(top_dir))
-
 # 利用 diffusers 自带的 AutoencoderKL 训练 VAE 模型
 if __name__ == "__main__":
+    from pathlib import Path
+    import sys
+    top_dir = Path(__file__).resolve().parent.parent.parent
+    sys.path.append(str(top_dir))
+
     from diffusers.models.autoencoder_kl import AutoencoderKL
     from config.config import Config
     from data.mnist_data import MNISTData
